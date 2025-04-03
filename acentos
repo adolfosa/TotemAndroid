@@ -5,9 +5,9 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Configuración específica para Epson NP-TC801 (Thermal Head CAP06-347)
+// Configuración específica para Epson NP-TC801
 const ESC = '\x1B';
-const INIT = ESC + '@' + ESC + 'R\x00' + ESC + 't\x00'; // Inicialización + USA + CP437
+const INIT = ESC + '@' + ESC + 'R\x02' + ESC + 't\x02'; // Inicialización + Latin1
 const BOLD_ON = ESC + 'E\x01';
 const BOLD_OFF = ESC + 'E\x00';
 const ALIGN_CENTER = ESC + 'a\x01';
@@ -17,29 +17,30 @@ const DOUBLE_HEIGHT = ESC + '!\x10';
 const NORMAL_HEIGHT = ESC + '!\x00';
 const CUT_PARTIAL = ESC + 'm';
 
-// Mapeo de caracteres específico para CP437 (Epson NP-TC801)
+// Mapeo de caracteres específico para NP-TC801
 const CHAR_MAP = {
-    '°': '\xF8',  // Símbolo grado
-    'á': '\xA0',  // á en CP437
-    'é': '\x82',  // é en CP437
-    'í': '\xA1',  // í en CP437
-    'ó': '\xA2',  // ó en CP437
-    'ú': '\xA3',  // ú en CP437 (este es el código correcto para la ú)
-    'ñ': '\xA4',  // ñ en CP437
-    'Ñ': '\xA5',  // Ñ en CP437
-    'ü': '\x81',  // ü en CP437
-    'Á': '\xB5',  // Á en CP437
-    'É': '\x90',  // É en CP437
-    'Í': '\xD6',  // Í en CP437
-    'Ó': '\xE0',  // Ó en CP437
-    'Ú': '\xE9',  // Ú en CP437
-    '¿': '\xA8',  // ¿ en CP437
-    '¡': '\xAD'   // ¡ en CP437
+    '°': '\xF8',  // Símbolo grado en Latin1
+    'á': '\xE1',
+    'é': '\xE9',
+    'í': '\xED',
+    'ó': '\xF3',
+    'ú': '\xFA',
+    'Á': '\xC1',
+    'É': '\xC9',
+    'Í': '\xCD',
+    'Ó': '\xD3',
+    'Ú': '\xDA',
+    'ñ': '\xF1',
+    'Ñ': '\xD1',
+    'ü': '\xFC',
+    'Ü': '\xDC',
+    '¡': '\xA1',
+    '¿': '\xBF'
 };
 
 function encodeForEpson(text) {
     return text.split('').map(char => {
-        // Reemplazar caracteres especiales según el mapa
+        // Reemplazar caracteres especiales
         if (CHAR_MAP[char]) return CHAR_MAP[char];
         // Mantener caracteres ASCII estándar
         return char.charCodeAt(0) < 128 ? char : '?';
@@ -125,9 +126,7 @@ app.post('/imprimir-ticket', (req, res) => {
     }
 });
 
-
-
-// Interfaz web (se mantiene igual)
+// Interfaz web
 app.get('/', (req, res) => {
     res.send(`
     <!DOCTYPE html>
@@ -260,24 +259,9 @@ app.get('/', (req, res) => {
                 <button type="submit">IMPRIMIR TICKET</button>
             </form>
         </div>
-        <div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 20px;">
-            <button onclick="location.href='/test-char'" style="background: #ff9800;">
-                Probar Caracteres Especiales
-            </button>
-        </div>
     </body>
     </html>
     `);
-});
-
-// Ruta para probar caracteres
-app.get('/test-char', (req, res) => {
-    try {
-        testU(); // Ejecuta la función de prueba
-        res.send('Prueba de caracteres enviada a la impresora');
-    } catch (err) {
-        res.status(500).send('Error al probar caracteres: ' + err.message);
-    }
 });
 
 app.listen(3000, '0.0.0.0', () => {
