@@ -1,0 +1,6 @@
+const { list } = require('@serialport/list');
+
+list().then(ports => {
+    console.log('Puertos disponibles:', ports);
+}).catch(err => console.error(err));
+
