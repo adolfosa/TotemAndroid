@@ -1,0 +1,20 @@
+const { SerialPort } = require('serialport');
+
+const port = new SerialPort({
+  path: '/dev/ttyUSB0',
+  baudRate: 115200,
+  lock: false,  // ¡Clave para Android!
+  autoOpen: false
+});
+
+port.open(err => {
+  if (err) {
+    console.error('❌ Error al abrir puerto:', err.message);
+    console.log('🔧 Soluciones rápidas:');
+    console.log('1. Reinicia el adaptador USB');
+    console.log('2. Ejecuta en Termux:');
+    console.log('   chmod 666 /dev/ttyUSB0');
+  } else {
+    console.log('✅ Puerto listo en /dev/ttyUSB0');
+  }
+});
